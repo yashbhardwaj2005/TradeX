@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { setup, teardown } from './helpers.js';
+import { setup, teardown, registerAndLogin } from './helpers.js';
 let app, user, token, models, market, trading;
 let price = 150000;
 const order = (side = 'BUY', quantity = 5) => ({
@@ -50,12 +50,12 @@ beforeEach(async () => {
       };
     },
   });
-  const res = await request(app).post('/api/v1/auth/register').send({
+  const res = await registerAndLogin(app, {
     fullName: 'Trading Test',
     email: 'trading@example.com',
     password: 'a-secure-password',
   });
-  assert.equal(res.status, 201);
+  assert.equal(res.status, 200);
   user = res.body.data.user;
   token = res.body.data.accessToken;
 });

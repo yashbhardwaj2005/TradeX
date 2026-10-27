@@ -14,7 +14,7 @@ function sendTokens(res, tokens, status = 200) {
   return ok(res, { accessToken: tokens.accessToken, user: tokens.user }, status);
 }
 export const register = async (req, res) =>
-  sendTokens(res, await auth.register(registerSchema.parse(req.body)), 201);
+  ok(res, await auth.register(registerSchema.parse(req.body)), 201);
 export const login = async (req, res) =>
   sendTokens(res, await auth.login(loginSchema.parse(req.body)));
 export const refresh = async (req, res) =>

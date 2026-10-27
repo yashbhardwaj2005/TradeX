@@ -246,6 +246,14 @@ label em:empty {
   padding: 12px;
   font-size: 12px;
 }
+.form-success {
+  border: 1px solid #3ac59c44;
+  background: #3ac59c0d;
+  color: #82dfbc;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 12px;
+}
 .auth-switch {
   font-size: 12px;
   text-align: center;

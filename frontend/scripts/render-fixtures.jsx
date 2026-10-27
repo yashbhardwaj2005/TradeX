@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '../src/store/auth';
 import App from '../src/App';
 import { api, restoreSession } from '../src/services/api';
+import { loginSchema, registrationSchema } from '../src/pages/Auth';
 export async function runChecks() {
   const now = new Date().toISOString();
   const stock = {
@@ -140,7 +141,28 @@ export async function runChecks() {
       </QueryClientProvider>,
     );
     assert.ok(html.includes('Email address'));
+    assert.equal(html.includes('Full name'), path === '/register');
+    assert.ok(html.includes(path === '/register' ? 'new-password' : 'current-password'));
   }
+  const loginAfterRegistration = renderToString(
+    <QueryClientProvider client={client}>
+      <MemoryRouter
+        initialEntries={[{ pathname: '/login', state: { registeredEmail: 'new@example.test' } }]}
+      >
+        <App />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  assert.ok(loginAfterRegistration.includes('Account created. Sign in'));
+  assert.ok(!loginAfterRegistration.includes('Full name'));
+  const credentials = { email: 'new@example.test', password: 'a-secure-password' };
+  assert.deepEqual(
+    loginSchema.parse({ ...credentials, fullName: '' }),
+    credentials,
+    'Login must strip stale registration fields so the strict API accepts its payload',
+  );
+  assert.equal(registrationSchema.safeParse(credentials).success, false);
+  assert.equal(registrationSchema.safeParse({ ...credentials, fullName: '' }).success, false);
   client.clear();
   await client.prefetchQuery({
     queryKey: ['/health', undefined],

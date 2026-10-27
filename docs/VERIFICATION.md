@@ -51,7 +51,7 @@ No hosted deployment, Atlas account configuration or licensed external market-da
 
 ## Manual browser checklist
 
-Run `npm run dev:local`, open the printed Vite URL and register a fresh account.
+Run `npm run dev:local`, open the printed Vite URL, register a fresh account, and sign in on the login screen. Registration must not open the workspace or issue session credentials. Switching between the register and login forms must not send the full-name field to the login API.
 
 1. Confirm the initial virtual balance, empty holdings and short/empty account-history state.
 2. At desktop, tablet and 375 px mobile widths, inspect navigation, table scrolling, chart sizing, form labels and trade-modal visibility.

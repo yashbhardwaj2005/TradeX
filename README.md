@@ -27,7 +27,7 @@ npm install
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173**, select **Create an account**, and register with a password of at least 10 characters. There are no shared demo credentials. Every user gets a private virtual wallet.
+Open **http://127.0.0.1:5173**, select **Create an account**, and register with a password of at least 10 characters. Account creation returns you to **Sign in**; enter your email and password to open the workspace. There are no shared demo credentials. Every user gets a private virtual wallet.
 
 `npm run dev` starts the entire stack and waits for the API/database before starting Vite. With no configured database URI it downloads an official MongoDB binary on first run (the Windows download is approximately 600 MB) and starts a persistent single-node replica set on `127.0.0.1:27018`. It reuses an already-running healthy API or TradeX frontend and refuses conflicting ports instead of silently switching the website to another port. The database is retained in `backend/.data/mongodb`; API watching does not restart MongoDB. Use `npm run dev:local` to force the local database, `LOCAL_MONGO_PORT` to change its port, or `npm run dev:external` for an already-configured Atlas/replica-set URI. Development signing secrets are generated in memory unless supplied in `.env`; restarting the entire local launcher invalidates existing sessions when using ephemeral secrets. Keep this command running while using the website; `Ctrl+C` stops its services.
 
@@ -137,26 +137,27 @@ Provider evaluation and the contract for adding an appropriately licensed Indian
 
 Base path: `/api/v1`. Success: `{ "success": true, "data": ... }`. Errors: `{ "success": false, "error": { "code": "…", "message": "…" } }`. Use `Authorization: Bearer <accessToken>` for private endpoints. Refresh tokens are sent via HTTP-only cookies, never in JSON or localStorage.
 
-| Method     | Endpoint                                                    | Behavior                                             |
-| ---------- | ----------------------------------------------------------- | ---------------------------------------------------- |
-| POST       | `/auth/register`, `/auth/login`                             | issue access token and refresh cookie                |
-| POST       | `/auth/refresh`, `/auth/logout`                             | rotate/revoke refresh family                         |
-| GET        | `/auth/me`                                                  | current private account                              |
-| PATCH      | `/auth/profile`                                             | update full name only                                |
-| GET        | `/stocks`, `/stocks/search?q=`                              | quote catalogue / company-symbol search              |
-| GET        | `/stocks/:symbol`, `/stocks/:symbol/history?range=1M`       | quote / OHLC; ranges 1W, 1M, 3M, 6M, 1Y              |
-| POST       | `/orders`, `/trades/buy`, `/trades/sell`                    | submit an idempotent virtual order                   |
-| GET        | `/orders`, `/orders/:id`                                    | own order history / details                          |
-| DELETE     | `/orders/:id`                                               | cancel an own pending order                          |
-| GET        | `/portfolio`, `/portfolio/holdings`, `/portfolio/analytics` | own valuations and snapshots                         |
-| GET        | `/transactions`                                             | own filled-trade ledger                              |
-| GET / POST | `/watchlist`                                                | own list / add `{symbol}`                            |
-| DELETE     | `/watchlist/:symbol`                                        | remove own list entry                                |
-| GET / POST | `/alerts`                                                   | own alerts / create `{symbol,condition,targetPrice}` |
-| DELETE     | `/alerts/:id`                                               | remove own alert                                     |
-| GET        | `/notifications`                                            | own latest 100 notifications                         |
-| PATCH      | `/notifications/:id/read`                                   | mark own notification read                           |
-| GET        | `/config`                                                   | public simulation/worker capabilities                |
+| Method     | Endpoint                                                    | Behavior                                                  |
+| ---------- | ----------------------------------------------------------- | --------------------------------------------------------- |
+| POST       | `/auth/register`                                            | create account; requires a separate login                 |
+| POST       | `/auth/login`                                               | verify credentials; issue access token and refresh cookie |
+| POST       | `/auth/refresh`, `/auth/logout`                             | rotate/revoke refresh family                              |
+| GET        | `/auth/me`                                                  | current private account                                   |
+| PATCH      | `/auth/profile`                                             | update full name only                                     |
+| GET        | `/stocks`, `/stocks/search?q=`                              | quote catalogue / company-symbol search                   |
+| GET        | `/stocks/:symbol`, `/stocks/:symbol/history?range=1M`       | quote / OHLC; ranges 1W, 1M, 3M, 6M, 1Y                   |
+| POST       | `/orders`, `/trades/buy`, `/trades/sell`                    | submit an idempotent virtual order                        |
+| GET        | `/orders`, `/orders/:id`                                    | own order history / details                               |
+| DELETE     | `/orders/:id`                                               | cancel an own pending order                               |
+| GET        | `/portfolio`, `/portfolio/holdings`, `/portfolio/analytics` | own valuations and snapshots                              |
+| GET        | `/transactions`                                             | own filled-trade ledger                                   |
+| GET / POST | `/watchlist`                                                | own list / add `{symbol}`                                 |
+| DELETE     | `/watchlist/:symbol`                                        | remove own list entry                                     |
+| GET / POST | `/alerts`                                                   | own alerts / create `{symbol,condition,targetPrice}`      |
+| DELETE     | `/alerts/:id`                                               | remove own alert                                          |
+| GET        | `/notifications`                                            | own latest 100 notifications                              |
+| PATCH      | `/notifications/:id/read`                                   | mark own notification read                                |
+| GET        | `/config`                                                   | public simulation/worker capabilities                     |
 
 `GET /api/health` returns 200 when MongoDB is connected, otherwise 503. Orders/transactions accept `page`, `limit` (1–100), `side`, `symbol`, `sort=asc|desc`, `from=YYYY-MM-DD`, `to=YYYY-MM-DD`; orders also accept `status`. Date filters represent complete India Standard Time days. Pagination includes `items`, `total`, `page`, `limit` and `totalPages`.
 

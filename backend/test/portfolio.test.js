@@ -2,14 +2,14 @@ import { before, after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { setup, teardown } from './helpers.js';
+import { setup, teardown, registerAndLogin } from './helpers.js';
 let app, token, user, trading, portfolio, market;
 before(async () => {
   app = await setup();
   trading = await import('../src/services/trading.service.js');
   portfolio = await import('../src/services/portfolio.service.js');
   market = await import('../src/services/market.service.js');
-  const res = await request(app).post('/api/v1/auth/register').send({
+  const res = await registerAndLogin(app, {
     fullName: 'Portfolio User',
     email: 'portfolio@example.com',
     password: 'a-secure-password',

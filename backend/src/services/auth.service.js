@@ -65,7 +65,7 @@ export async function register(input) {
       ],
       { session },
     );
-    return issueTokens(user, undefined, session);
+    return { user: publicUser(user) };
   });
 }
 const dummyHash = await bcrypt.hash('tradeforge-dummy-password', 12);

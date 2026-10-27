@@ -2,14 +2,16 @@ import { before, after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { setup, teardown } from './helpers.js';
+import { setup, teardown, registerAndLogin } from './helpers.js';
 let app, a, b, order;
 before(async () => {
   app = await setup();
   for (const email of ['a@example.com', 'b@example.com']) {
-    const r = await request(app)
-      .post('/api/v1/auth/register')
-      .send({ fullName: 'Account Test', email, password: 'a-secure-password' });
+    const r = await registerAndLogin(app, {
+      fullName: 'Account Test',
+      email,
+      password: 'a-secure-password',
+    });
     if (!a) a = r.body.data;
     else b = r.body.data;
   }

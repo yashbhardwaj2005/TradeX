@@ -1,5 +1,7 @@
 import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
+import assert from 'node:assert/strict';
+import request from 'supertest';
 process.env.NODE_ENV = 'test';
 process.env.MONGODB_URI = 'mongodb://127.0.0.1/test';
 process.env.JWT_ACCESS_SECRET = 'test-access-secret-at-least-32-characters';
@@ -19,4 +21,13 @@ export async function setup() {
 export async function teardown() {
   await mongoose.disconnect();
   await replica?.stop();
+}
+export async function registerAndLogin(app, input) {
+  const registered = await request(app).post('/api/v1/auth/register').send(input);
+  assert.equal(registered.status, 201);
+  const loggedIn = await request(app)
+    .post('/api/v1/auth/login')
+    .send({ email: input.email, password: input.password });
+  assert.equal(loggedIn.status, 200);
+  return loggedIn;
 }

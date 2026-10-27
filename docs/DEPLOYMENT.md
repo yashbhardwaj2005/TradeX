@@ -55,7 +55,7 @@ Logout revokes the refresh-token family. Existing ten-minute access tokens expir
 ## Validate after deployment
 
 1. Confirm `/api/health` returns 200 with a connected database.
-2. Register and verify exactly ₹10,00,000 virtual cash and no holdings.
+2. Register, confirm the account stays signed out until you log in, then verify exactly ₹10,00,000 virtual cash and no holdings.
 3. Reload the frontend and confirm refresh cookies restore the session without localStorage tokens.
 4. Buy and sell a share; verify the holding, cash, ledger and order status agree.
 5. On an always-on deployment, place a tiny-price pending buy limit, cancel it and verify no fill occurred. On this free deployment, verify automatic limit orders are explicitly unavailable.

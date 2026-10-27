@@ -27,7 +27,7 @@ Market buying/selling, authentication, holdings, analytics, watchlists and histo
 3. In Render, create a Blueprint from that repository and set the [Blueprint Path](https://render.com/docs/infrastructure-as-code) to `render.free.yaml`. Confirm the selected service is **Free** before deployment. A service name may need a unique suffix; the actual URL comes from Render.
 4. Supply `MONGODB_URI` when prompted. The blueprint generates the two JWT secrets. It does not create a database or purchase anything.
 5. Deploy. Render provides `RENDER_EXTERNAL_URL`, which the API uses to allow its own frontend origin. For a custom domain, set `PUBLIC_APP_URL` to that exact HTTPS origin.
-6. Check `/api/health`, load `/portfolio` directly, register, buy a virtual share, reload, and sign out. The first request after idle can wait for Render to wake the service.
+6. Check `/api/health`, load `/portfolio` directly, register, sign in with the new account, buy a virtual share, reload, and sign out. The first request after idle can wait for Render to wake the service.
 
 The GitHub, Render and Atlas integrations were found but were not connected during preparation. No remote service or public URL has been created. Once those accounts are connected, the source and configuration can be published without needing a paid plan. Public deployment uses the cloud database, not local QA accounts; no local account data is uploaded automatically.
 
@@ -35,4 +35,4 @@ The GitHub, Render and Atlas integrations were found but were not connected duri
 
 **Vercel Hobby frontend + Render Free API + Atlas Free** can also cost $0 for an eligible personal, non-commercial project, within each provider's limits. [Vercel's Hobby restrictions](https://vercel.com/pricing) apply. It adds a separate API URL and cross-site cookie configuration; the Render sleep and worker limitations remain. The single-origin layout above requires fewer moving parts.
 
-Verify the prepared production path locally with `npm run build` followed by `npm run verify:deployment`. The latter starts an isolated temporary database and production server, checks static assets, SPA routes, API errors, secure-cookie registration and an actual virtual buy, and stops its test services. It does not use or clear your local accounts.
+Verify the prepared production path locally with `npm run build` followed by `npm run verify:deployment`. The latter starts an isolated temporary database and production server, checks static assets, SPA routes, API errors, registration followed by a separate secure-cookie login and an actual virtual buy, and stops its test services. It does not use or clear your local accounts.

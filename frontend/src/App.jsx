@@ -97,8 +97,11 @@ export default function App() {
     );
   return (
     <Routes>
-      <Route path="/login" element={user ? <Navigate to="/" /> : <Auth />} />
-      <Route path="/register" element={user ? <Navigate to="/" /> : <Auth register />} />
+      <Route path="/login" element={user ? <Navigate to="/" /> : <Auth key="login" />} />
+      <Route
+        path="/register"
+        element={user ? <Navigate to="/" /> : <Auth key="register" register />}
+      />
       <Route path="/*" element={user ? <Workspace /> : <Navigate to="/login" replace />} />
     </Routes>
   );

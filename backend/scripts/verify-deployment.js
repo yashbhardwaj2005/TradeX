@@ -64,20 +64,29 @@ try {
   const missing = await fetch(`${origin}/api/unknown`);
   assert.equal(missing.status, 404);
   assert.match(missing.headers.get('content-type'), /json/);
+  const password = randomUUID();
   const registration = await fetch(`${origin}/api/v1/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Origin: 'https://tradex.example' },
     body: JSON.stringify({
       fullName: 'Deployment Check',
       email: 'deployment@example.test',
-      password: randomUUID(),
+      password,
     }),
   });
   assert.equal(registration.status, 201);
-  assert.match(registration.headers.get('set-cookie'), /HttpOnly/);
-  assert.match(registration.headers.get('set-cookie'), /Secure/);
-  assert.match(registration.headers.get('set-cookie'), /SameSite=Lax/);
-  const session = (await registration.json()).data;
+  assert.equal(registration.headers.get('set-cookie'), null);
+  assert.equal((await registration.json()).data.accessToken, undefined);
+  const login = await fetch(`${origin}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Origin: 'https://tradex.example' },
+    body: JSON.stringify({ email: 'deployment@example.test', password }),
+  });
+  assert.equal(login.status, 200);
+  assert.match(login.headers.get('set-cookie'), /HttpOnly/);
+  assert.match(login.headers.get('set-cookie'), /Secure/);
+  assert.match(login.headers.get('set-cookie'), /SameSite=Lax/);
+  const session = (await login.json()).data;
   const headers = {
     'Content-Type': 'application/json',
     Origin: 'https://tradex.example',
@@ -107,7 +116,7 @@ try {
   assert.equal(limit.status, 503);
   assert.equal((await limit.json()).error.code, 'WORKER_DISABLED');
   console.log(
-    'PASS: production entry point serves TradeX, bundled JS, favicon, NSE deep links and JSON API errors; secure-cookie registration and a virtual buy work with the free-deployment worker disabled.',
+    'PASS: production entry point serves TradeX, bundled JS, favicon, NSE deep links and JSON API errors; registration requires a separate secure-cookie login, and a virtual buy works with the free-deployment worker disabled.',
   );
 } finally {
   if (child.exitCode === null) {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,13 +7,17 @@ import { z } from 'zod';
 import { ArrowUpRight, Check, ChevronRight, ChartNoAxesCombined, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../store/auth';
 import { api, errorMessage } from '../services/api';
-const schema = z.object({
-  fullName: z.string().trim().min(2, 'Enter your full name').optional(),
-  email: z.email('Enter a valid email'),
+export const loginSchema = z.object({
+  email: z.string().trim().pipe(z.email('Enter a valid email')),
+  password: z.string().min(1, 'Enter your password').max(72),
+});
+export const registrationSchema = loginSchema.extend({
+  fullName: z.string().trim().min(2, 'Enter your full name').max(80),
   password: z.string().min(10, 'Use at least 10 characters').max(72),
 });
 export default function Auth({ register: registering = false }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const setSession = useAuth((s) => s.setSession);
   const [error, setError] = useState('');
@@ -22,14 +26,22 @@ export default function Auth({ register: registering = false }) {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm({ resolver: zodResolver(schema) });
+  } = useForm({
+    resolver: zodResolver(registering ? registrationSchema : loginSchema),
+    shouldUnregister: true,
+    defaultValues: { email: location.state?.registeredEmail || '', password: '' },
+  });
   async function submit(values) {
     setError('');
     try {
       const { data } = await api.post(`/auth/${registering ? 'register' : 'login'}`, values);
+      if (registering) {
+        navigate('/login', { replace: true, state: { registeredEmail: values.email } });
+        return;
+      }
       queryClient.clear();
       setSession(data.data);
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -81,6 +93,11 @@ export default function Auth({ register: registering = false }) {
               : 'Your trading workspace is ready for you.'}
           </p>
           <form onSubmit={handleSubmit(submit)}>
+            {!registering && location.state?.registeredEmail && (
+              <div role="status" className="form-success">
+                Account created. Sign in with your email and password to continue.
+              </div>
+            )}
             {registering && (
               <label>
                 Full name

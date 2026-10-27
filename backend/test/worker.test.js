@@ -2,7 +2,7 @@ import { before, after, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { randomUUID } from 'node:crypto';
-import { setup, teardown } from './helpers.js';
+import { setup, teardown, registerAndLogin } from './helpers.js';
 let app, user, token, models, trading, alerts, market, price;
 const input = {
   symbol: 'RELIANCE.NSE',
@@ -43,9 +43,11 @@ beforeEach(async () => {
     'Snapshot',
   ])
     await models[name].deleteMany({});
-  const res = await request(app)
-    .post('/api/v1/auth/register')
-    .send({ fullName: 'Worker User', email: 'worker@example.com', password: 'a-secure-password' });
+  const res = await registerAndLogin(app, {
+    fullName: 'Worker User',
+    email: 'worker@example.com',
+    password: 'a-secure-password',
+  });
   user = res.body.data.user;
   token = res.body.data.accessToken;
   setPrice(150000);

@@ -22,10 +22,17 @@ async function call(method, path, data, extra = {}) {
 const html = await fetch(origin);
 assert.equal(html.status, 200);
 assert.match(await html.text(), /TradeX/);
-const account = await call('POST', '/auth/register', {
+const credentials = {
   fullName: 'Local QA Trader',
   email: `qa-${randomUUID()}@example.test`,
   password: randomUUID(),
+};
+const registered = await call('POST', '/auth/register', credentials);
+assert.equal(registered.accessToken, undefined);
+assert.equal(cookie, undefined);
+const account = await call('POST', '/auth/login', {
+  email: credentials.email,
+  password: credentials.password,
 });
 token = account.accessToken;
 assert.equal((await call('GET', '/auth/me')).virtualBalance, 100000000);
