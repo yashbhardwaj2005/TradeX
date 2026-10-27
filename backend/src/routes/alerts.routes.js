@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import { authenticate } from '../middlewares/security.js';
+import * as controller from '../controllers/alerts.controller.js';
+export const alertsRouter = Router();
+alertsRouter.use(authenticate);
+alertsRouter.get('/alerts', controller.list);
+alertsRouter.post('/alerts', controller.create);
+alertsRouter.delete('/alerts/:id', controller.remove);
+alertsRouter.get('/notifications', controller.notifications);
+alertsRouter.patch('/notifications/:id/read', controller.read);

@@ -1,0 +1,34 @@
+# Free demonstration deployment. Sleeping hosting cannot run automatic workers.
+services:
+  - type: web
+    name: tradex
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build && npm prune --omit=dev
+    startCommand: npm run start:full
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 24.13.1
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: COOKIE_SECURE
+        value: 'true'
+      - key: COOKIE_SAME_SITE
+        value: lax
+      - key: SERVE_FRONTEND
+        value: 'true'
+      - key: TRUST_PROXY
+        value: '1'
+      - key: MARKET_PROVIDER
+        value: simulated
+      - key: WORKER_ENABLED
+        value: 'false'
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: '1'

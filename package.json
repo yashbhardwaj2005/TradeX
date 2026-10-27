@@ -1,0 +1,31 @@
+{
+  "name": "tradex",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:local": "node scripts/dev.mjs --local",
+    "dev:external": "node scripts/dev.mjs --external",
+    "build": "npm run build -w frontend",
+    "test": "npm run test -w backend",
+    "check": "node --check scripts/dev.mjs && npm run check -w backend && npm run build",
+    "start": "npm start -w backend",
+    "start:full": "node backend/scripts/start-full.js",
+    "verify:deployment": "node backend/scripts/verify-deployment.js",
+    "check:release": "node scripts/check-release.mjs",
+    "smoke": "node backend/scripts/smoke.js",
+    "verify": "npm run check && npm test && npm run check:render -w frontend && npm run check:proxy -w frontend",
+    "format": "prettier --write frontend/src frontend/scripts backend/src backend/scripts backend/test docs README.md"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prettier": "^3.6.2"
+  }
+}

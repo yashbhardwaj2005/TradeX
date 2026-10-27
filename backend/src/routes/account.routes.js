@@ -1,0 +1,12 @@
+import { Router } from 'express';
+import { authenticate } from '../middlewares/security.js';
+import * as controller from '../controllers/account.controller.js';
+export const accountRouter = Router();
+accountRouter.use(authenticate);
+accountRouter.get('/orders', controller.orders);
+accountRouter.get('/orders/:id', controller.order);
+accountRouter.get('/transactions', controller.transactions);
+accountRouter.get('/watchlist', controller.list);
+accountRouter.post('/watchlist', controller.add);
+accountRouter.delete('/watchlist/:symbol', controller.remove);
+accountRouter.patch('/auth/profile', controller.profile);
