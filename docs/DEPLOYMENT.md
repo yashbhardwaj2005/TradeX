@@ -2,7 +2,9 @@
 
 The selected deployment is a Vercel frontend, Render Free Express backend and MongoDB Atlas Free database. The default `render.yaml` (also available as `render.api.yaml`) provisions the API only. A single-service alternative remains in [FREE_DEPLOYMENT.md](FREE_DEPLOYMENT.md) and `render.free.yaml`.
 
-The deployed frontend is https://tradex-henna-nine.vercel.app and the API is https://tradex-api-7evm.onrender.com. The frontend proxies `/api` to Render using `frontend/vercel.json`; leave `VITE_API_URL` unset. Both hosts deploy from the private `yashbhardwaj2005/TradeX` GitHub repository. Atlas uses the `TradeX` project and free M0 cluster in Singapore. The application database is `tradex`, and its application user has read/write access only to that database. Atlas allows the Render service's published outbound ranges.
+The deployed frontend is https://yashtradex.vercel.app and the API is https://tradex-api-7evm.onrender.com. The frontend proxies `/api` to Render using `frontend/vercel.json`; leave `VITE_API_URL` unset. Both hosts deploy from the private `yashbhardwaj2005/TradeX` GitHub repository. Atlas uses the `TradeX` project and free M0 cluster in Singapore. The application database is `tradex`, and its application user has read/write access only to that database. Atlas allows the Render service's published outbound ranges.
+
+When changing the frontend domain, update Render's `CLIENT_ORIGINS` to the new exact HTTPS origin and redeploy the API. Changing the Vercel domain alone does not update the backend's allowed origins. The current value is `https://yashtradex.vercel.app`.
 
 Render Free sleeps when idle, so the first request can take longer. `WORKER_ENABLED=false` disables automatic limit execution, price alerts, and scheduled portfolio snapshots. The app uses simulated prices and virtual money.
 
