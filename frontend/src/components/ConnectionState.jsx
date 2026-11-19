@@ -9,8 +9,8 @@ export default function ConnectionState({ error, onRetry, pending }) {
         <h1>{error ? 'Reconnecting to TradeX' : 'Getting your workspace ready'}</h1>
         <p>
           {error
-            ? 'The service is temporarily unavailable. We’re reconnecting automatically; your account and trades are preserved.'
-            : 'Connecting securely to your account and market workspace…'}
+            ? 'The free server may be waking up after inactivity. This can take about a minute. We’ll reconnect automatically; your account and trades are preserved.'
+            : 'Connecting securely to your workspace. The free server can take about a minute to wake up after inactivity…'}
         </p>
         {import.meta.env.DEV && error && (
           <div className="connection-help">

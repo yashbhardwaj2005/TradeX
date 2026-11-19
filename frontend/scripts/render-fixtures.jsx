@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '../src/store/auth';
 import App from '../src/App';
-import { api, restoreSession } from '../src/services/api';
+import { api, restoreSession, get, connectionPollInterval } from '../src/services/api';
 import { loginSchema, registrationSchema } from '../src/pages/Auth';
 export async function runChecks() {
   const now = new Date().toISOString();
@@ -188,6 +188,44 @@ export async function runChecks() {
   );
   client.clear();
   await checkSessionRefresh(user);
+  await checkColdStartRecovery(user);
+}
+async function checkColdStartRecovery(user) {
+  const original = api.defaults.adapter;
+  let available = false;
+  const requests = [];
+  api.defaults.adapter = async (config) => {
+    requests.push({ path: config.url, timeout: config.timeout });
+    return {
+      data: available
+        ? { success: true, data: { database: 'connected' } }
+        : '<!DOCTYPE html><title>Starting service</title>',
+      status: 200,
+      statusText: 'OK',
+      config,
+      headers: {},
+    };
+  };
+  try {
+    useAuth.getState().setSession({ user, accessToken: 'preserved-during-wakeup' });
+    await assert.rejects(get('/health'), { code: 'API_STARTING' });
+    await assert.rejects(restoreSession(), { code: 'API_STARTING' });
+    assert.equal(useAuth.getState().token, 'preserved-during-wakeup');
+    available = true;
+    assert.equal((await get('/health')).database, 'connected');
+    assert.equal(requests[0].timeout, 90000, 'Readiness must wait for the free host to wake');
+    assert.equal(requests[1].timeout, 15000, 'Session mutations must keep their normal timeout');
+    assert.deepEqual(
+      [1, 2, 3, 4, 5, 20].map((errorUpdateCount) =>
+        connectionPollInterval({ state: { status: 'error', errorUpdateCount } }),
+      ),
+      [2000, 4000, 8000, 16000, 30000, 30000],
+      'Repeated outages must back off instead of hammering the sleeping service',
+    );
+  } finally {
+    api.defaults.adapter = original;
+    useAuth.getState().clear();
+  }
 }
 async function checkSessionRefresh(user) {
   const original = api.defaults.adapter;

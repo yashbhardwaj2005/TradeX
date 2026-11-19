@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAuth } from './store/auth';
-import { restoreSession } from './services/api';
+import { restoreSession, connectionPollInterval } from './services/api';
 import { useApi } from './hooks/useApi';
 import ConnectionState from './components/ConnectionState';
 import Auth from './pages/Auth';
@@ -60,8 +60,8 @@ export default function App() {
   const connection = useApi('/health', undefined, {
     retry: false,
     retryOnMount: false,
-    refetchInterval: (query) => (query.state.status === 'error' ? 2000 : 30000),
-    refetchIntervalInBackground: true,
+    refetchInterval: connectionPollInterval,
+    refetchIntervalInBackground: false,
   });
   useEffect(() => {
     if (ready || !connection.isSuccess) return;
@@ -74,7 +74,7 @@ export default function App() {
       } catch (error) {
         if (!cancelled && error.response?.status !== 401) {
           setSessionError(error);
-          retryTimer = setTimeout(restore, 2000);
+          retryTimer = setTimeout(restore, 10000);
         }
       }
     }

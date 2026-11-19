@@ -8,6 +8,8 @@ When changing the frontend domain, update Render's `CLIENT_ORIGINS` to the new e
 
 Render Free sleeps when idle, so the first request can take longer. `WORKER_ENABLED=false` disables automatic limit execution, price alerts, and scheduled portfolio snapshots. The app uses simulated prices and virtual money.
 
+The browser allows up to 90 seconds for readiness while the free API wakes. It rejects hosting HTML loading pages as unavailable API responses, preserves the existing session during an outage, and backs off reconnect attempts to 30 seconds. Hidden tabs do not poll health continuously. Regular API operations retain their normal timeout and are not automatically resubmitted after a network failure.
+
 ## Atlas
 
 Create an Atlas cluster and application database user. Restrict network access to the backend's outbound addresses where feasible. Set the Render `MONGODB_URI` using the Atlas-provided connection string with a database name. Atlas or another replica set/sharded deployment is required; a standalone MongoDB server is not supported. The API verifies transaction-capable topology and initializes unique indexes before listening.

@@ -35,7 +35,17 @@ export async function restoreSession() {
   return refreshPromise;
 }
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Free hosts can return HTML loading/challenge pages with HTTP 200 while waking.
+    // Only the application's JSON envelope means the API is actually ready.
+    if (response.data?.success !== true || !Object.hasOwn(response.data, 'data')) {
+      const error = new Error('TradeX is starting or reconnecting. Please wait a moment.');
+      error.code = 'API_STARTING';
+      error.config = response.config;
+      throw error;
+    }
+    return response;
+  },
   async (error) => {
     const config = error.config;
     const sessionEndpoint = [
@@ -52,9 +62,16 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
-export const get = async (url, params) => (await api.get(url, { params })).data.data;
+export const get = async (url, params) =>
+  (await api.get(url, { params, ...(url === '/health' ? { timeout: 90000 } : {}) })).data.data;
+export const connectionPollInterval = (query) =>
+  query.state.status === 'error'
+    ? Math.min(30000, 2000 * 2 ** Math.min(Math.max(0, query.state.errorUpdateCount - 1), 4))
+    : 30000;
 export const errorMessage = (error) =>
   error.response?.data?.error?.message ||
-  (error.code === 'ECONNABORTED'
-    ? 'The server took too long. Please try again.'
-    : 'Unable to reach TradeX. Check that the API is running.');
+  (error.code === 'API_STARTING'
+    ? error.message
+    : error.code === 'ECONNABORTED'
+      ? 'The server took too long. Please try again.'
+      : 'Unable to reach TradeX. Check that the API is running.');
